@@ -170,7 +170,7 @@ url='http://172.20.2.51/train/'
 #session_id=''#题目id
 auth_id=''#账号信息
 NET_SessionId=''
-print('请在脚本文件中更改auth_id（在url中）和NET_SessionId（在cookie中）')
+print('请在脚本文件中更改auth_id（在url中）和NET_SessionId（在cookie中）,每次重新登录刷题网站后都要更改')
 while 1:
     session_id=input('输入题目的session_id:\n')
     ptime=1
@@ -198,3 +198,4 @@ while 1:
         # print(score)
         # print(iinput)
         # print(ans)
+    print('此题结束，请输入下一题的sessionid')
