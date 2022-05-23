@@ -1,3 +1,5 @@
+from ast import pattern
+from ensurepip import version
 from sqlite3 import Date, Timestamp
 from itsdangerous import base64_encode
 import requests
@@ -56,6 +58,7 @@ def getiinput(res):#获取测试的iinput
             break
         s3[i]=re.sub('\\r','',s3[i])
         score2[i] = s3[i].rstrip('</pre>') #从右侧去除字符串中的'</pre>'
+        score2[i] =re.sub('%','%%',score2[i])
         i=i+1
     print(score2)
     return score2
@@ -86,9 +89,9 @@ def makeCode(ans,iinput,ptime,code):
     i=0
     if(ptime==1):
         i=0
-        code='%23include%3Cstdio.h%3E%0Aint%20main%28%29%0A%7B%0A%20%20%20%20char%20a%5B20%5D%5B80%5D%2Cb%5B5%5D%5B20%5D%5B80%5D%3B'
+        code='%23include%3Cstdio.h%3E%0Aint%20main%28%29%0A%7B%0A%20%20%20%20char%20a%5B50%5D%5B80%5D%2Cb%5B50%5D%5B20%5D%5B80%5D%3B'
         #print(iinput)
-        if(iinput[0]==urllib.parse.quote('无输入')):
+        if(iinput[0]=='无输入'):
             for key in ans:
                 code+='%0A%20%20%20%20printf%28%22'+ans[key]+'%5Cn%22%29%3B'
             return code;
@@ -124,7 +127,7 @@ def getQid(url,session_id,auth_id,NET_SessionId,vis):
     pattern=re.compile("global_qid_data.*=\['(.*?)' \];")
     qid=re.findall(pattern,res.text)
     # print(res.text)
-    print(qid[0])
+    print('qid:'+qid[0])
     return qid[0]
 
 def getvis(url,session_id,auth_id,NET_SessionId):
@@ -138,7 +141,7 @@ def getvis(url,session_id,auth_id,NET_SessionId):
     pattern=re.compile("global_qid_data(.*?)=\[")
     qid=re.findall(pattern,res.text)
     # print(res.text)
-    print(qid[0])
+    print('vis:'+qid[0])
     return qid[0]
 
 def postCode(url,session_id,ptime,qid,code,NET_SessionId,vis):
@@ -152,6 +155,7 @@ def postCode(url,session_id,ptime,qid,code,NET_SessionId,vis):
     data='<?xml version="1.0" encoding="UTF-8"?><data sessionID="'+str(session_id)+'"><t'+vis+'><d><q>'+str(qid)+'</q><v>'+str(code)+'%0A%7D</v></d></t'+vis+'></data>'
     #print(data)
     data=re.sub('%26gt%3B','>',data)
+    #data=re.sub('%26lt%3B','&lt',data)
     data=base64_encode(data)
     #print(data)
     data=data.decode()
@@ -164,23 +168,24 @@ def postCode(url,session_id,ptime,qid,code,NET_SessionId,vis):
     data='xml='+data
     #print(data)
     res=requests.post(url=qUrl,data=data,headers=headers)
-    #print(res.text)
+    print(res.text)
 
 url='http://172.20.2.51/train/'
-#session_id=''#题目id
-auth_id=''#账号信息
-NET_SessionId=''
-print('请在脚本文件中更改auth_id（在url中）和NET_SessionId（在cookie中）,每次重新登录刷题网站后都要更改')
+session_id='be63738447884b3380bc6a1f1aaa12bb'#题目id
+auth_id='55ee6d72e84242929ce355b1edc602ef'#账号信息
+NET_SessionId='03kil3mhch2cvfazks2jv0ba'
+print('请在脚本文件中更改auth_id（在url中）和NET_SessionId（在cookie中）')
 while 1:
     session_id=input('输入题目的session_id:\n')
     ptime=1
     code='%23include%3Cstdio.h%3E%0Aint%20main()%0A%7B%0A%20%20%20%20printf(%22test%20msg%22)%3B'
     vis=getvis(url,session_id,auth_id,NET_SessionId)
     qid=getQid(url,session_id,auth_id,NET_SessionId,vis)
-    #vis=''
-    #qid=''
+    # vis=''(若题目崩溃，请手动输入vis和qid的值，具体值在前面有输出)
+    # qid=''
     postCode(url,session_id,ptime,qid,code,NET_SessionId,vis)
     res=fPost(url,session_id,auth_id,NET_SessionId)
+    #print(res)
     print('第'+str(ptime)+'次尝试')
     score=getScore(res)
     while score < 10:   
@@ -198,4 +203,3 @@ while 1:
         # print(score)
         # print(iinput)
         # print(ans)
-    print('此题结束，请输入下一题的sessionid')
