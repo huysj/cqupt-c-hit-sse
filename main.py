@@ -1,5 +1,3 @@
-from ast import pattern
-from ensurepip import version
 from sqlite3 import Date, Timestamp
 from itsdangerous import base64_encode
 import requests
