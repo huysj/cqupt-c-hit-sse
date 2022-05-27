@@ -43,19 +43,21 @@ def getiinput(res):#获取测试的iinput
     #     i=i+1
     # #print(score2)
     # return score2#这是一个列表
-
+    score2={}
     soup = BeautifulSoup(res, "html.parser")
     s = str(soup.find_all(class_ = "s1 diff")) #class必须加下划线tmd
     s1 = s.split('<pre>')
+    if(s1[0] == '[]'):
+        score2[0]='ddddone'
+        return  score2
     s2 = s1[1]
     s3 = s2.split('\n')
     i=0
-    score2={}
     for key in s3:
         if(key=='</td>'):
             break
         s3[i]=re.sub('\\r','',s3[i])
-        score2[i] = s3[i].rstrip('</pre>') #从右侧去除字符串中的'</pre>'
+        score2[i] = re.sub('</pre>','',s3[i])#s3[i].rstrip('</pre>') #从右侧去除字符串中的'</pre>'
         score2[i] =re.sub('%','%%',score2[i])
         i=i+1
     print(score2)
@@ -186,8 +188,11 @@ while 1:
     #print(res)
     print('第'+str(ptime)+'次尝试')
     score=getScore(res)
-    while score < 10:   
+    while 1:   
         iinput=getiinput(res)
+        if(iinput[0]=='ddddone'):
+            print('此题结束\n')
+            break
         ans=getOutput(res)
         code=makeCode(ans,iinput,ptime,code)
         postCode(url,session_id,ptime,qid,code,NET_SessionId,vis)
